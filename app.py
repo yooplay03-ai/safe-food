@@ -29,40 +29,55 @@ st.set_page_config(page_title="Safe-Food | 만성질환자 맞춤형 외식 안�
 render_html("""
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --sf-pink: #F4A8C6;
-  --sf-pink-deep: #E06FA0;
-  --sf-sky: #8FCBEA;
-  --sf-sky-deep: #4FA8D8;
-  --sf-paper: #FFF8FB;
-  --sf-ink: #3A3947;
-  --sf-muted: #8B8798;
-  --sf-safe: #2F9E6F;
-  --sf-caution: #B9862A;
-  --sf-warning: #C1442C;
-  --sf-none: #9C97A8;
-  --sf-border: #F6DCE9;
+  --sf-pink: #EC4899;
+  --sf-pink-deep: #DB2777;
+  --sf-sky: #8B5CF6;
+  --sf-sky-deep: #7C3AED;
+  --sf-paper: #FFF8FC;
+  --sf-card: #FFFFFF;
+  --sf-ink: #1F1B2E;
+  --sf-muted: #726C82;
+  --sf-safe: #059669;
+  --sf-caution: #B45309;
+  --sf-warning: #DC2626;
+  --sf-none: #6B7280;
+  --sf-border: #F2DCE9;
 }
 
+/* 드롭다운/멀티셀렉트 팝업은 body 최상단에 별도로 렌더링되기 때문에,
+   페이지 전체를 다크로 바꾸면 그 팝업 내부 글자가 안 보이는 문제가 생김.
+   그래서 기본 배경은 밝게 유지하고, 컬러는 채도 있는 핑크/바이올렛으로 포인트만 줌. */
 html, body, .stApp { background: var(--sf-paper) !important; color: var(--sf-ink); }
 .stApp, .stApp p, .stApp span, .stApp label, .stApp li { font-family: 'Pretendard', -apple-system, sans-serif; }
-/* 아이콘 폰트(펼침메뉴 화살표, 눈모양 아이콘 등)는 Pretendard로 덮이면 안 되므로 별도 복원 */
 [data-testid="stIconMaterial"], span[class*="material-symbols"], i[class*="material-symbols"] {
   font-family: 'Material Symbols Rounded', 'Material Icons' !important;
 }
+[data-testid="stHeaderActionElements"] { display: none !important; }
+[data-testid="stCaptionContainer"] { margin-bottom: 0.15rem !important; color: var(--sf-muted) !important; }
+
+/* 배경에 은은하게 깔리는 핑크/바이올렛 글로우 (밝은 배경이라 아주 옅게) */
+[data-testid="stAppViewContainer"]::before {
+  content: ""; position: fixed; top: -10%; left: -10%; width: 55%; height: 55%;
+  background: radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+[data-testid="stAppViewContainer"]::after {
+  content: ""; position: fixed; bottom: -15%; right: -10%; width: 50%; height: 50%;
+  background: radial-gradient(circle, rgba(124,58,237,0.09) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
 
 [data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #FDF1F7 0%, #EFF7FC 100%);
+  background: linear-gradient(180deg, #FFF9FC 0%, #FBF5FF 100%);
   border-right: 1px solid var(--sf-border);
 }
 [data-testid="stSidebar"] * { color: var(--sf-ink) !important; }
 [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
-  font-family: 'Fraunces', serif !important;
-  letter-spacing: 0.01em;
+  font-weight: 800 !important; letter-spacing: -0.01em;
 }
-/* 입력창/선택박스 - 흰 배경 + 진한 텍스트로 확실하게 보이도록 */
 [data-testid="stSidebar"] input, [data-testid="stSidebar"] textarea,
 [data-testid="stSidebar"] [data-baseweb="select"] > div {
   background: #FFFFFF !important;
@@ -70,93 +85,177 @@ html, body, .stApp { background: var(--sf-paper) !important; color: var(--sf-ink
   border: 1.5px solid var(--sf-border) !important;
   color: var(--sf-ink) !important;
 }
-[data-testid="stSidebar"] input::placeholder { color: #B8AFC4 !important; opacity: 1; }
+[data-testid="stSidebar"] input::placeholder { color: #B8A9C4 !important; opacity: 1; }
 [data-testid="stSidebar"] [data-testid="stExpander"] {
-  background: rgba(255,255,255,0.65);
+  background: #FFFFFF;
   border-radius: 12px !important;
   border: 1px solid var(--sf-border) !important;
 }
 
-h1, h2, h3 { font-family: 'Fraunces', serif !important; color: var(--sf-ink); letter-spacing: -0.01em; }
-h2 { border-bottom: 2px dashed var(--sf-border); padding-bottom: 0.5rem; }
+h1, h2, h3 { font-family: 'Pretendard', sans-serif !important; color: var(--sf-ink); letter-spacing: -0.02em; font-weight: 800 !important; }
+h2 { border-bottom: none; padding-bottom: 0.6rem; position: relative; }
+h2::after {
+  content: ""; display: block; margin-top: 0.6rem;
+  height: 3px; width: 56px; border-radius: 999px;
+  background: linear-gradient(90deg, var(--sf-pink) 0%, var(--sf-sky) 100%);
+}
 
-hr { border: none !important; border-top: 2px dashed var(--sf-border) !important; margin: 2rem 0 !important; }
+hr { border: none !important; height: 1px !important; margin: 2rem 0 !important;
+  background: linear-gradient(90deg, transparent 0%, var(--sf-border) 20%, var(--sf-border) 80%, transparent 100%) !important; }
 
 .stButton > button {
-  background: var(--sf-sky-deep) !important;
+  background: linear-gradient(135deg, var(--sf-pink) 0%, var(--sf-sky) 100%) !important;
   color: white !important;
   border-radius: 999px !important;
   border: none !important;
   padding: 0.5rem 1.6rem !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   transition: all 0.2s ease !important;
-  box-shadow: 0 2px 8px rgba(79,168,216,0.3);
+  box-shadow: 0 4px 16px rgba(236,72,153,0.3);
 }
 .stButton > button:hover {
-  background: var(--sf-pink-deep) !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(224,111,160,0.35);
+  box-shadow: 0 10px 26px rgba(124,58,237,0.4);
 }
 
 [data-testid="stMetric"] {
-  background: white;
+  background: var(--sf-card);
   border: 1px solid var(--sf-border);
   border-radius: 14px;
   padding: 0.9rem 1rem;
-  box-shadow: 0 2px 6px rgba(58,57,71,0.05);
+  box-shadow: 0 4px 16px rgba(236,72,153,0.08);
 }
 
-[data-testid="stExpander"] { border-radius: 14px !important; border: 1px solid var(--sf-border) !important; overflow: hidden; }
+[data-testid="stExpander"] { background: var(--sf-card); border-radius: 14px !important; border: 1px solid var(--sf-border) !important; overflow: hidden; }
 [data-baseweb="notification"] { border-radius: 12px !important; }
 
 @keyframes sfFadeInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-.sf-hero, .sf-food-card { animation: sfFadeInUp 0.55s ease both; }
+@keyframes sfDotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(236,72,153,0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(236,72,153,0); }
+}
+@keyframes sfAvatarGlow {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(236,72,153,0.2), 0 4px 14px rgba(0,0,0,0.15); }
+  50% { box-shadow: 0 0 0 7px rgba(236,72,153,0.05), 0 4px 14px rgba(0,0,0,0.15); }
+}
+@keyframes sfGlowFloat {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-3%, 3%); }
+}
+
+/* 사이드바 프로필 카드 - 채도 있는 다크 카드를 포인트로 (자체 완결형이라 팝업 이슈 없음) */
+.sf-profile-card {
+  background: linear-gradient(150deg, #241729 0%, #2E1A45 100%);
+  border: 1px solid rgba(236,72,153,0.25);
+  border-radius: 18px;
+  padding: 1.1rem 1.2rem;
+  margin: 0.8rem 0 1.2rem 0;
+  box-shadow: 0 10px 28px rgba(236,72,153,0.22);
+  animation: sfFadeInUp 0.55s ease both;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.sf-profile-card:hover { box-shadow: 0 14px 36px rgba(124,58,237,0.3); transform: translateY(-2px); }
+.sf-profile-card * { color: #F5EFFA !important; }
+.sf-profile-label {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: #F0A8CE !important; margin: 0 0 0.7rem 0;
+}
+.sf-profile-label .sf-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #EC4899; animation: sfDotPulse 1.8s ease-in-out infinite;
+}
+.sf-profile-row { display: flex; align-items: center; gap: 0.85rem; }
+.sf-profile-avatar {
+  flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; overflow: hidden;
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  border: 2px solid rgba(236,72,153,0.5);
+  animation: sfAvatarGlow 2.6s ease-in-out infinite;
+}
+.sf-profile-name {
+  font-weight: 800; font-size: 1.1rem; margin: 0;
+  background: linear-gradient(90deg, #F9A8D4 0%, #C4B5FD 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent !important;
+}
+.sf-profile-meta { font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: #C9BEDD !important; margin: 0.15rem 0 0 0; }
 
 .sf-badge {
   display: inline-flex; align-items: center; gap: 0.35rem;
   padding: 0.32rem 0.85rem; border-radius: 999px;
   font-weight: 700; font-size: 0.9rem;
   font-family: 'IBM Plex Mono', monospace;
-  border: 2px dashed currentColor;
-  transition: transform 0.2s ease;
+  border: 1px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.sf-badge:hover { transform: rotate(-2deg) scale(1.05); }
-.sf-badge-safe { background: #E1F5EA; color: var(--sf-safe); }
-.sf-badge-caution { background: #FDF0D9; color: var(--sf-caution); }
-.sf-badge-warning { background: #FCE4E4; color: var(--sf-warning); }
-.sf-badge-none { background: #F1EEF4; color: var(--sf-none); }
+.sf-badge:hover { transform: translateY(-1px) scale(1.03); }
+.sf-badge-safe { background: rgba(5,150,105,0.1); color: var(--sf-safe); border-color: rgba(5,150,105,0.3); }
+.sf-badge-caution { background: rgba(180,83,9,0.1); color: var(--sf-caution); border-color: rgba(180,83,9,0.3); }
+.sf-badge-warning { background: rgba(220,38,38,0.1); color: var(--sf-warning); border-color: rgba(220,38,38,0.3); }
+.sf-badge-none { background: rgba(107,114,128,0.1); color: var(--sf-none); border-color: rgba(107,114,128,0.25); }
 
 .sf-food-card {
-  background: white; border: 1px solid var(--sf-border); border-radius: 16px;
+  background: var(--sf-card); border: 1px solid var(--sf-border); border-radius: 16px;
   padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
-  box-shadow: 0 2px 10px rgba(244,168,198,0.15);
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 4px 20px rgba(236,72,153,0.08);
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
 }
-.sf-food-card:hover { box-shadow: 0 8px 24px rgba(143,203,234,0.25); transform: translateY(-3px); }
+.sf-food-card:hover { box-shadow: 0 14px 34px rgba(124,58,237,0.16); transform: translateY(-3px); border-color: rgba(236,72,153,0.3); }
 .sf-food-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
-.sf-food-name { font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 600; color: var(--sf-ink); margin: 0 0 0.15rem 0; }
+.sf-food-name { font-size: 1.2rem; font-weight: 700; color: var(--sf-ink); margin: 0 0 0.15rem 0; }
 .sf-food-sub { color: var(--sf-muted); font-size: 0.83rem; margin-bottom: 0.5rem; }
 .sf-food-stats { font-family: 'IBM Plex Mono', monospace; font-size: 0.92rem; color: var(--sf-ink); margin: 0.4rem 0; }
 .sf-caption { color: var(--sf-muted); font-size: 0.78rem; margin: 0.15rem 0; }
-.sf-note { border-left: 3px solid var(--sf-caution); background: #FDF0D9; padding: 0.5rem 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-top: 0.5rem; }
-.sf-note-danger { border-left: 3px solid var(--sf-warning); background: #FCE4E4; }
+.sf-note { border-left: 3px solid var(--sf-caution); background: rgba(180,83,9,0.06); padding: 0.5rem 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-top: 0.5rem; color: var(--sf-ink); }
+.sf-note-danger { border-left: 3px solid var(--sf-warning); background: rgba(220,38,38,0.06); }
 
+/* 히어로 - 밝은 배경 + 은은한 글로우 + 그라데이션 텍스트 */
 .sf-hero {
-  background: linear-gradient(135deg, var(--sf-pink) 0%, var(--sf-sky) 100%);
-  border-radius: 24px; padding: 2.4rem 2.4rem 1.8rem 2.4rem; color: var(--sf-ink);
-  margin-bottom: 1.2rem; position: relative;
-  border-bottom: 3px dashed rgba(255,255,255,0.7);
+  background: linear-gradient(160deg, #FFFFFF 0%, #FDF2F8 100%);
+  border: 1px solid var(--sf-border);
+  border-radius: 24px; padding: 2.4rem 2.6rem; color: var(--sf-ink);
+  margin-bottom: 1.4rem; position: relative; overflow: hidden;
+  box-shadow: 0 16px 44px rgba(236,72,153,0.14);
+  animation: sfFadeInUp 0.6s ease both;
 }
-.sf-wordmark { font-family: 'Fraunces', serif; font-weight: 700; font-size: 2.5rem; letter-spacing: -0.02em; margin: 0; display: flex; align-items: center; gap: 0.55rem; color: #2E2B3A; }
-.sf-tagline { font-size: 1.02rem; color: #4A4658; margin: 0.4rem 0 1.2rem 0; }
-.sf-legend { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-.sf-legend .sf-badge { background: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.9); color: #2E2B3A; }
+.sf-hero::before {
+  content: ""; position: absolute; top: -30%; right: -15%; width: 55%; height: 130%;
+  background: radial-gradient(circle, rgba(236,72,153,0.16) 0%, transparent 65%);
+  animation: sfGlowFloat 8s ease-in-out infinite;
+  pointer-events: none;
+}
+.sf-hero::after {
+  content: ""; position: absolute; bottom: -40%; left: -10%; width: 45%; height: 110%;
+  background: radial-gradient(circle, rgba(139,92,246,0.14) 0%, transparent 65%);
+  animation: sfGlowFloat 9s ease-in-out infinite reverse;
+  pointer-events: none;
+}
+.sf-hero-eyebrow {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--sf-pink-deep);
+  background: rgba(236,72,153,0.08); border: 1px solid rgba(236,72,153,0.28);
+  border-radius: 999px; padding: 0.35rem 0.9rem; margin-bottom: 1.1rem;
+}
+.sf-hero-eyebrow .sf-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sf-pink); animation: sfDotPulse 1.8s ease-in-out infinite; }
+.sf-wordmark {
+  position: relative; z-index: 1;
+  font-weight: 900; font-size: 2.7rem; letter-spacing: -0.03em; margin: 0;
+  display: flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(90deg, #1F1B2E 0%, var(--sf-pink) 55%, var(--sf-sky) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.sf-tagline { position: relative; z-index: 1; font-size: 1.02rem; color: var(--sf-muted); margin: 0.5rem 0 1.3rem 0; max-width: 34rem; }
+.sf-legend { position: relative; z-index: 1; display: flex; gap: 0.6rem; flex-wrap: wrap; }
 
 .sf-eyebrow { color: var(--sf-pink-deep) !important; }
 
 @media (max-width: 640px) {
-  .sf-hero { padding: 1.6rem 1.4rem 1.3rem 1.4rem; border-radius: 16px; }
-  .sf-wordmark { font-size: 1.7rem; }
+  .sf-hero { padding: 1.8rem 1.5rem; border-radius: 18px; }
+  .sf-wordmark { font-size: 1.8rem; }
   .sf-tagline { font-size: 0.88rem; }
   .sf-legend { gap: 0.4rem; }
   .sf-legend .sf-badge { font-size: 0.78rem; padding: 0.26rem 0.65rem; }
@@ -166,13 +265,13 @@ hr { border: none !important; border-top: 2px dashed var(--sf-border) !important
   .sf-food-card-top > div:last-child p { max-width: 100% !important; }
   .sf-food-name { font-size: 1.1rem; }
   .sf-food-stats { font-size: 0.85rem; }
-  .sf-wordmark, .sf-food-name { word-break: keep-all; }
 }
 </style>
 """)
 
 render_html("""
 <div class="sf-hero">
+  <p class="sf-hero-eyebrow"><span class="sf-dot"></span>TRAVEL & HEALTH COMPANION</p>
   <p class="sf-wordmark">🧳 Safe-Food</p>
   <p class="sf-tagline">여행지에서도, 안심하고 드세요 — 만성질환자를 위한 외식 안전 가이드</p>
   <div class="sf-legend">
@@ -312,19 +411,41 @@ def get_checklist(diseases, ibd_active, category_text=None):
 # 3. 사이드바 - 사용자 건강 프로필
 # ============================================================
 with st.sidebar:
-    render_html("""
-    <div style="padding: 0.6rem 0 1rem 0; border-bottom: 1px dashed #F0BFD8; margin-bottom: 1rem;">
-      <p style="font-family:'IBM Plex Mono',monospace; font-size:0.72rem; letter-spacing:0.12em; color:#E06FA0; margin:0 0 0.15rem 0;">PASSENGER PROFILE</p>
-      <p style="font-family:'Fraunces',serif; font-size:1.35rem; font-weight:600; color:#3A3947; margin:0;">👤 사용자 건강 프로필</p>
+    name_col, age_col = st.columns([1.3, 1])
+    with name_col:
+        user_name = st.text_input("이름 (선택)", placeholder="")
+    with age_col:
+        user_age = st.number_input("나이", min_value=1, max_value=120, value=25, step=1)
+
+    # 기존 로직(저작·삼킴 안내 등)과의 호환을 위해 실제 나이를 연령대 버킷으로 변환
+    if user_age < 20:
+        age_group = "20대 이하"
+    elif user_age < 40:
+        age_group = "20~40대"
+    elif user_age < 65:
+        age_group = "40~65세"
+    else:
+        age_group = "65세 이상"
+
+    name_html = (
+        f'<p class="sf-profile-name">{html.escape(user_name.strip())}</p>'
+        if user_name.strip() else ""
+    )
+    render_html(f"""
+    <div class="sf-profile-card">
+      <p class="sf-profile-label"><span class="sf-dot"></span>PROFILE</p>
+      <div class="sf-profile-row">
+        <div class="sf-profile-avatar">🧍</div>
+        <div>
+          {name_html}
+          <p class="sf-profile-meta">{user_age}세 · {html.escape(age_group)}</p>
+        </div>
+      </div>
     </div>
     """)
 
-age_group = st.sidebar.selectbox(
-    "연령대",
-    ["20대 이하", "20~40대", "40~65세", "65세 이상"]
-)
-if age_group == "65세 이상":
-    st.sidebar.caption("🦷 저작·삼킴이 편한 메뉴를 우선 안내해 드려요.")
+    if age_group == "65세 이상":
+        st.caption("🦷 저작·삼킴이 편한 메뉴를 우선 안내해 드려요.")
 
 st.sidebar.markdown("**관리 중인 만성질환** (중복 선택 가능)")
 disease_options = DISEASE_NUMERIC_NAMES + list(KEYWORD_WARNINGS.keys())
@@ -714,6 +835,7 @@ def render_food_cards(items):
 def fetch_ai_nutrition_estimate(food_name, api_key):
     """식약처 DB에 없는 메뉴의 영양성분을 LLM에게 추정하게 함.
     ⚠️ 이건 실측치가 아니라 AI의 추정값이며, 참고용으로만 써야 함.
+    similar_dish: 식약처 표준 DB에 있을 법한 유사 음식명 (있으면 실측 재검색에 사용).
     반환값이 None이면 호출 실패(키 오류 등)."""
     import json as _json
     import re as _re
@@ -727,11 +849,13 @@ def fetch_ai_nutrition_estimate(food_name, api_key):
     prompt = (
         f"한식 메뉴 '{food_name}' 1인분의 영양성분을 일반적인 조리법 기준으로 대략 추정해줘. "
         f"다른 설명 없이 아래 JSON 형식으로만 답변해:\n"
-        f'{{"kcal": 숫자, "sodium_mg": 숫자, "sugar_g": 숫자, "protein_g": 숫자}}'
+        f'{{"kcal": 숫자, "sodium_mg": 숫자, "sugar_g": 숫자, "protein_g": 숫자, '
+        f'"note": "추정 근거를 30자 이내 한 문장으로", '
+        f'"similar_dish": "식약처 표준 영양성분 DB에 있을 법한 가장 비슷한 일반 음식명 (예: 즉석떡볶이->떡볶이, 없으면 빈 문자열)"}}'
     )
     body = {
         "model": "claude-sonnet-4-6",
-        "max_tokens": 200,
+        "max_tokens": 300,
         "messages": [{"role": "user", "content": prompt}],
     }
     try:
@@ -749,6 +873,8 @@ def fetch_ai_nutrition_estimate(food_name, api_key):
             "nat": float(parsed.get("sodium_mg", 0)),
             "sugar": float(parsed.get("sugar_g", 0)),
             "prot": float(parsed.get("protein_g", 0)),
+            "note": str(parsed.get("note", "")).strip(),
+            "similar_dish": str(parsed.get("similar_dish", "")).strip(),
         }
     except Exception:
         return None
@@ -777,6 +903,8 @@ def render_ai_estimate_card(food_name, est):
         if allergy_hits else ""
     )
 
+    note_html = f'<p class="sf-caption">💭 추정 근거: {html.escape(est["note"])}</p>' if est.get("note") else ""
+
     render_html(f"""
     <div class="sf-food-card" style="border: 2px dashed var(--sf-pink-deep);">
       <div class="sf-food-card-top">
@@ -784,6 +912,7 @@ def render_ai_estimate_card(food_name, est):
           <p class="sf-food-name">🤖 {html.escape(food_name)}</p>
           <p class="sf-food-sub" style="color: var(--sf-pink-deep); font-weight:600;">⚠️ AI 추정치 — 실측값이 아닙니다. 참고용으로만 사용하세요.</p>
           <p class="sf-food-stats">⚡ {est['kcal']}kcal(추정) · 🥩 {est['prot']}g(추정) · 🧂 {est['nat']}mg(추정) · 🍬 {est['sugar']}g(추정)</p>
+          {note_html}
           {detail_html}
           {notes_html}
           {allergy_html}
@@ -833,8 +962,24 @@ RECOMMENDED_FOODS = {
 }
 
 
-def get_recommendations(diseases, ibd_active):
-    """선택된 질환 기준 '비교적 무난한 메뉴 유형' 추천 리스트 생성"""
+# 업종(카카오 category_name)별 "이 업종에서는 이런 걸 골라보세요" 긍정 프레이밍 팁.
+# 체크리스트의 주의 문구(get_category_hint)와는 톤이 달라야 하므로 별도로 관리.
+CATEGORY_POSITIVE_TIPS = {
+    "한식": "나물 반찬이 많은 정식·백반 메뉴가 비교적 무난해요.",
+    "고기": "살코기 위주 부위나 채소 쌈이 곁들여진 메뉴를 찾아보세요.",
+    "구이": "기름기 적은 부위의 구이나 생선구이가 비교적 무난해요.",
+    "카페": "무설탕·저당 옵션이 있는 아메리카노나 티 종류가 무난해요.",
+    "디저트": "생과일이 들어간 메뉴가 크림·시럽 많은 것보다 나아요.",
+    "제과": "생과일이 들어간 메뉴가 크림·시럽 많은 것보다 나아요.",
+    "일식": "회·초밥처럼 간장을 적게 찍어 먹는 메뉴가 비교적 무난해요.",
+    "중식": "탕수육처럼 소스를 따로 찍어 먹는 메뉴가 볶음 요리보다 나아요.",
+    "분식": "튀김·국물 많은 메뉴보다 김밥류가 비교적 무난해요.",
+    "치킨": "양념치킨보다 담백한 순살구이가 비교적 무난해요.",
+}
+
+
+def get_recommendations(diseases, ibd_active, category_text=None):
+    """선택된 질환 + (있으면) 식당 업종 기준으로 '비교적 무난한 메뉴 유형' 추천 리스트 생성"""
     recs = []
     for d in diseases:
         entry = RECOMMENDED_FOODS.get(d)
@@ -849,6 +994,13 @@ def get_recommendations(diseases, ibd_active):
             tag = f"[{d}]"
         for item in items:
             recs.append(f"{tag} {item}")
+
+    if category_text:
+        for keyword, tip in CATEGORY_POSITIVE_TIPS.items():
+            if keyword in category_text:
+                recs.append(f"[업종 참고] {tip}")
+                break  # 업종 팁은 가장 먼저 매칭되는 것 하나만 (여러 개 겹치면 오히려 산만함)
+
     return recs
 
 
@@ -891,10 +1043,16 @@ def analyze_menu(keyword):
                     est = fetch_ai_nutrition_estimate(keyword, anthropic_api_key)
                 if est:
                     render_ai_estimate_card(keyword, est)
+                    similar = est.get("similar_dish")
+                    if similar and similar != keyword:
+                        similar_items, similar_matched = search_food_with_fallback(similar)
+                        if similar_items:
+                            st.caption(f"🔎 AI가 제안한 유사 메뉴 '{similar}'로 식약처 DB를 다시 찾아보니, 실측 데이터가 있었어요:")
+                            render_food_cards(similar_items)
                 else:
                     st.error("AI 추정 호출에 실패했어요. API 키를 확인해주세요.")
         else:
-            st.caption("👈 사이드바에 Anthropic API 키를 입력하면 AI 추정치를 참고로 볼 수 있어요 (실측 아님, 유료).")
+            st.caption("AI 추정 기능은 현재 이용할 수 없어요. 대신 아래 체크리스트를 참고해보세요.")
     render_checklist()
 
 # ============================================================
@@ -968,14 +1126,10 @@ REGION_COORDS = {
 
 REGION_GRID = {name: latlon_to_grid(lat, lon) for name, (lat, lon) in REGION_COORDS.items()}
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("**🌦️ 날씨 연동 (선택)**")
-kma_service_key = st.sidebar.text_input(
-    "기상청 API 인증키 (승인 후 입력)",
-    value=get_secret("KMA_API_KEY"),
-    type="password",
-    help="공공데이터포털에서 발급받은 Decoding 서비스키를 입력하세요. secrets.toml에 KMA_API_KEY로 저장해두면 자동으로 채워져요."
-)
+# API 키는 사용자에게 입력받지 않고 secrets.toml에서 조용히 읽어옵니다.
+# (실제 서비스라면 사용자가 API 키를 직접 입력하는 화면은 없어야 하므로,
+#  개발/테스트 편의용이었던 사이드바 입력창을 제거하고 서버 설정값처럼 동작하게 함)
+kma_service_key = get_secret("KMA_API_KEY")
 
 
 def get_base_datetime():
@@ -1079,7 +1233,7 @@ with col_weather:
         else:
             st.caption("기상청 API 호출 실패 — 인증키를 확인해주세요.")
     else:
-        st.caption("👈 사이드바에 기상청 인증키를 입력하면 날씨가 여기 표시돼요.")
+        st.caption("날씨 정보를 준비 중이에요.")
 
 st.markdown("---")
 
@@ -1087,23 +1241,11 @@ st.markdown("---")
 # 6. TourAPI(한국관광공사) 지역 기반 음식점 추천
 #    ※ 2024년 이후 신분류체계 적용으로 엔드포인트가 KorService2로 변경됨
 #      (구 버전 KorService1 예제 코드는 더 이상 정상 작동하지 않음)
-st.sidebar.markdown("---")
-st.sidebar.markdown("**🗺️ 관광 코스 연동 (선택)**")
-kakao_rest_key = st.sidebar.text_input(
-    "카카오 REST API 키 (관광지·맛집 검색용)",
-    value=get_secret("KAKAO_API_KEY"),
-    type="password",
-    help="Kakao Developers > 애플리케이션 > [카카오맵] 사용 설정 후 발급받은 REST API 키를 입력하세요. secrets.toml에 KAKAO_API_KEY로 저장해두면 자동으로 채워져요.",
-)
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("**🤖 AI 영양 추정 (선택)**")
-anthropic_api_key = st.sidebar.text_input(
-    "Anthropic API 키 (식약처 DB에 없는 메뉴용)",
-    value=get_secret("ANTHROPIC_API_KEY"),
-    type="password",
-    help="console.anthropic.com에서 발급. 유료(토큰 종량과금) API이며, 결과는 실측치가 아닌 AI 추정치입니다.",
-)
+# API 키는 사용자에게 입력받지 않고 secrets.toml에서 조용히 읽어옵니다.
+tour_service_key = get_secret("TOUR_API_KEY")
+barrier_free_key = get_secret("BARRIER_FREE_API_KEY")
+kakao_rest_key = get_secret("KAKAO_API_KEY")
+anthropic_api_key = get_secret("ANTHROPIC_API_KEY")
 
 
 CATEGORY_NUTRI_HINTS = {
@@ -1132,6 +1274,97 @@ def get_category_hint(category_text):
         if keyword in category_text:
             return hint
     return None
+
+
+# ============================================================
+# TourAPI(한국관광공사) 지역코드 및 관광지 조회
+#    ※ 공모전 "한국관광공사 OpenAPI 필수 활용" 요건 충족용 — 관광지 검색의 메인 데이터 소스.
+#    2024년 이후 신분류체계 적용으로 엔드포인트가 KorService2로 변경됨.
+# ============================================================
+TOUR_AREA_CODE = {
+    "서울": 1, "인천": 2, "대전": 3, "부산": 6, "제주": 39,
+    "강릉": 32, "속초": 32, "전주": 37, "여수": 38, "경주": 35,
+    "수원": 31, "성남": 31, "용인": 31, "고양": 31, "안양": 31,
+    "부천": 31, "안산": 31, "파주": 31, "가평": 31, "평택": 31, "화성": 31,
+}
+
+
+@st.cache_data(ttl=3600)
+def fetch_tour_attractions(area_code, service_key, num_of_rows=15):
+    """TourAPI로 지역의 관광지(contentTypeId=12) 조회 — 공모전 필수 요건 데이터 소스"""
+    url = "http://apis.data.go.kr/B551011/KorService2/areaBasedList2"
+    params = {
+        "serviceKey": service_key,
+        "numOfRows": num_of_rows,
+        "pageNo": 1,
+        "MobileOS": "ETC",
+        "MobileApp": "SafeFoodTour",
+        "arrange": "Q",
+        "contentTypeId": 12,  # 12 = 관광지
+        "areaCode": area_code,
+        "_type": "json",
+    }
+    try:
+        res = requests.get(url, params=params, timeout=10)
+        if res.status_code == 200:
+            return res.json()
+        return None
+    except Exception:
+        return None
+
+
+def parse_tour_attraction_list(data):
+    """TourAPI 응답을 {관광지 이름: (경도, 위도)} 형태로 정리. 결과 1건이면 dict로 오므로 리스트로 통일."""
+    try:
+        items = data["response"]["body"]["items"]["item"]
+    except (KeyError, TypeError):
+        return {}
+    if isinstance(items, dict):
+        items = [items]
+    result = {}
+    for it in items:
+        name, mapx, mapy = it.get("title"), it.get("mapx"), it.get("mapy")
+        if name and mapx and mapy:
+            result[name] = (float(mapx), float(mapy))
+    return result
+
+
+@st.cache_data(ttl=3600)
+def fetch_barrier_free_info(area_code, service_key, num_of_rows=15):
+    """한국관광공사_무장애 여행 정보 API로 지역의 무장애(편의시설) 관광지 조회.
+    화장실·경사로 등 편의정보를 관광지·음식점·숙박시설 단위로 제공."""
+    url = "http://apis.data.go.kr/B551011/KorWithService1/areaBasedList1"
+    params = {
+        "serviceKey": service_key,
+        "numOfRows": num_of_rows,
+        "pageNo": 1,
+        "MobileOS": "ETC",
+        "MobileApp": "SafeFoodTour",
+        "arrange": "Q",
+        "areaCode": area_code,
+        "_type": "json",
+    }
+    try:
+        res = requests.get(url, params=params, timeout=10)
+        if res.status_code == 200:
+            return res.json()
+        return None
+    except Exception:
+        return None
+
+
+def parse_barrier_free_list(data):
+    """무장애 여행정보 응답을 [{이름, 주소}] 리스트로 정리"""
+    try:
+        items = data["response"]["body"]["items"]["item"]
+    except (KeyError, TypeError):
+        return []
+    if isinstance(items, dict):
+        items = [items]
+    return [
+        {"title": it.get("title", "이름 없음"), "addr": it.get("addr1", "")}
+        for it in items if it.get("title")
+    ]
 
 
 @st.cache_data(ttl=1800)
@@ -1254,14 +1487,20 @@ except ImportError:
     FOLIUM_AVAILABLE = False
 
 
-GRADE_COLOR = {"안전": "green", "주의": "orange", "경고": "red", None: "gray"}
-GRADE_ICON = {"안전": "🟢", "주의": "🟡", "경고": "🔴", None: "⚪"}
+def _dot_icon(color, size=16, border="#FFFFFF"):
+    """기본 Leaflet 물방울 핀 대신 쓰는 심플한 원형 도트 마커 (더 정돈되어 보임)"""
+    html = (
+        f'<div style="width:{size}px;height:{size}px;border-radius:50%;'
+        f'background:{color};border:2px solid {border};'
+        f'box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div>'
+    )
+    return folium.DivIcon(html=html, icon_size=(size, size), icon_anchor=(size // 2, size // 2))
 
 
 def build_restaurant_map(markers, attraction=None, toilets=None):
-    """식당 좌표(mapx/mapy)에 안전도 색깔 핀을 찍은 folium 지도 생성.
+    """식당 좌표(mapx/mapy)에 원형 도트 마커를 찍은 folium 지도 생성.
     attraction이 주어지면 관광지 위치도 별 모양 파란 핀으로,
-    toilets가 주어지면 화장실 위치도 회색 핀으로 함께 표시."""
+    toilets가 주어지면 화장실 위치도 연보라 도트로 함께 표시."""
     valid = [m for m in markers if m["lat"] and m["lon"]]
     toilets = toilets or []
     if not valid and not attraction and not toilets:
@@ -1285,12 +1524,13 @@ def build_restaurant_map(markers, attraction=None, toilets=None):
             icon=folium.Icon(color="blue", icon="star", prefix="fa"),
         ).add_to(fmap)
 
+    # 카카오는 자동 등급 정보가 없어 항상 같은 값이라, 등급색 대신 브랜드색 도트로 통일
     for m in valid:
         folium.Marker(
             location=[m["lat"], m["lon"]],
-            popup=f"{GRADE_ICON.get(m['grade'])} {m['title']} ({m['grade'] or '정보없음'})",
+            popup=f"🍽️ {m['title']}",
             tooltip=m["title"],
-            icon=folium.Icon(color=GRADE_COLOR.get(m["grade"], "gray"), icon="cutlery", prefix="fa"),
+            icon=_dot_icon("#4FA8D8", size=16),  # var(--sf-sky-deep)
         ).add_to(fmap)
 
     for t in toilets:
@@ -1299,7 +1539,7 @@ def build_restaurant_map(markers, attraction=None, toilets=None):
                 location=[t["lat"], t["lon"]],
                 popup=f"🚻 {t['title']}",
                 tooltip=f"🚻 {t['title']}",
-                icon=folium.Icon(color="lightgray", icon="info-sign"),
+                icon=_dot_icon("#B8AFC4", size=12),
             ).add_to(fmap)
 
     return fmap
@@ -1307,127 +1547,156 @@ def build_restaurant_map(markers, attraction=None, toilets=None):
 
 section_eyebrow("03", "NEARBY RESTAURANTS")
 st.header("🍴 관광지 근처 맛집")
-st.caption("📍 카카오맵에 등록된 실제 관광지·식당 기준(거리순). 대표메뉴 정보는 없어서 체크리스트로 보완해요.")
 
-if not kakao_rest_key:
-    st.info("👈 사이드바에 카카오 REST API 키를 입력하면 관광지·맛집 목록이 표시됩니다.")
+if not tour_service_key and not kakao_rest_key:
+    st.info("관광지·맛집 정보를 준비 중이에요.")
 else:
     region_lat, region_lon = REGION_COORDS[selected_region]
 
-    # 1) 지역 중심 반경 5km 이내 관광명소(AT4) 조회
-    attraction_data = fetch_kakao_places(region_lon, region_lat, kakao_rest_key, category_code="AT4", radius=5000, size=15)
+    # 1) 관광지 조회: TourAPI(한국관광공사, 필수 활용 요건) 우선, 없으면 카카오로 보조
     attraction_map = {}
-    if attraction_data:
-        for d in attraction_data.get("documents", []):
-            name = d.get("place_name")
-            if name and d.get("x") and d.get("y"):
-                attraction_map[name] = (float(d["x"]), float(d["y"]))  # (경도, 위도)
+    attraction_source = None
+    if tour_service_key and selected_region in TOUR_AREA_CODE:
+        tour_attraction_data = fetch_tour_attractions(TOUR_AREA_CODE[selected_region], tour_service_key)
+        attraction_map = parse_tour_attraction_list(tour_attraction_data) if tour_attraction_data else {}
+        if attraction_map:
+            attraction_source = "한국관광공사 TourAPI"
 
-    selected_attraction_name = None
-    if attraction_map:
-        attraction_choice = st.selectbox(
-            "🏞️ 관광지 선택 — 이 근처 맛집을 보여드려요",
-            [f"{selected_region} 중심으로 보기"] + list(attraction_map.keys()),
+    if not attraction_map and kakao_rest_key:
+        kakao_attraction_data = fetch_kakao_places(region_lon, region_lat, kakao_rest_key, category_code="AT4", radius=5000, size=15)
+        if kakao_attraction_data:
+            for d in kakao_attraction_data.get("documents", []):
+                name = d.get("place_name")
+                if name and d.get("x") and d.get("y"):
+                    attraction_map[name] = (float(d["x"]), float(d["y"]))
+        if attraction_map:
+            attraction_source = "카카오맵 (TourAPI 등록 정보 없어 보조 사용)"
+
+    # 관광지 선택 + 출처 안내를 카드 하나로 묶음 (예전엔 캡션이 줄줄이 흩어져있어 지저분했음)
+    with st.container(border=True):
+        selected_attraction_name = None
+        if attraction_map:
+            attraction_choice = st.selectbox(
+                "🏞️ 관광지 선택 — 이 근처 맛집을 보여드려요",
+                [f"{selected_region} 중심으로 보기"] + list(attraction_map.keys()),
+            )
+            if attraction_choice != f"{selected_region} 중심으로 보기":
+                selected_attraction_name = attraction_choice
+            st.caption(f"관광지 출처: {attraction_source} · 맛집 출처: 카카오맵(거리순) · 대표메뉴 정보는 없어 체크리스트로 보완해요")
+        else:
+            st.caption("이 지역에 등록된 관광명소를 찾지 못해서, 지역 중심으로 맛집을 보여드려요.")
+
+    # 1-1) 무장애 여행 정보 (선택) — 화장실·경사로 등 편의시설, 만성질환자 이동 부담 고려
+    if barrier_free_key and selected_region in TOUR_AREA_CODE:
+        bf_data = fetch_barrier_free_info(TOUR_AREA_CODE[selected_region], barrier_free_key)
+        bf_list = parse_barrier_free_list(bf_data) if bf_data else []
+        if bf_list:
+            with st.expander(f"♿ '{selected_region}' 무장애(편의시설) 등록 명소 {len(bf_list)}곳"):
+                st.caption("한국관광공사 무장애 여행 정보 기준 — 화장실·경사로 등 편의시설이 등록된 곳이에요.")
+                for bf in bf_list[:10]:
+                    st.write(f"• {bf['title']} — {bf['addr']}")
+
+    if not kakao_rest_key:
+        st.caption("근처 맛집 정보를 준비 중이에요.")
+    else:
+        # 2) 중심 좌표 결정: 관광지 선택 시 좁게(800m), 아니면 지역 중심으로 넓게(3km)
+        attraction_marker = None
+        if selected_attraction_name:
+            center_x, center_y = attraction_map[selected_attraction_name]
+            radius = 800
+            attraction_marker = {"name": selected_attraction_name, "lat": center_y, "lon": center_x}
+            toilet_query = f"{selected_attraction_name} 화장실"
+            radius_desc = f"'{selected_attraction_name}' 반경 {radius}m 이내"
+        else:
+            center_x, center_y = region_lon, region_lat
+            radius = 3000
+            toilet_query = f"{selected_region} 화장실"
+            radius_desc = f"'{selected_region}' 중심 반경 {radius}m 이내 (관광지를 고르면 더 좁혀져요)"
+
+        # 화장실: 카카오 키워드 검색으로 실좌표 조회 시도 (공식 화장실 API는 2025년부터 좌표 미제공이라 대체)
+        toilet_data = fetch_kakao_keyword("공중화장실", center_x, center_y, kakao_rest_key, radius=radius, size=10)
+        toilets = []
+        if toilet_data:
+            for d in toilet_data.get("documents", []):
+                if d.get("place_name") and d.get("x") and d.get("y"):
+                    toilets.append({
+                        "title": d["place_name"],
+                        "lat": float(d["y"]),
+                        "lon": float(d["x"]),
+                    })
+
+        kakao_map_url = f"https://map.kakao.com/?q={urllib.parse.quote(toilet_query)}"
+        toilet_line = (
+            f"🚻 화장실 {len(toilets)}곳 지도 표시 (카카오맵 태그 기준, 일부 누락 가능 · [더보기]({kakao_map_url}))"
+            if toilets else
+            f"🚻 태그된 화장실 없음 → [카카오맵에서 검색하기]({kakao_map_url})"
         )
-        if attraction_choice != f"{selected_region} 중심으로 보기":
-            selected_attraction_name = attraction_choice
-    else:
-        st.caption("이 지역 근처에 등록된 관광명소가 없어서, 지역 중심으로 맛집을 보여드려요.")
 
-    # 2) 중심 좌표 결정: 관광지 선택 시 좁게(800m), 아니면 지역 중심으로 넓게(3km)
-    attraction_marker = None
-    if selected_attraction_name:
-        center_x, center_y = attraction_map[selected_attraction_name]
-        radius = 800
-        attraction_marker = {"name": selected_attraction_name, "lat": center_y, "lon": center_x}
-        toilet_query = f"{selected_attraction_name} 화장실"
-        st.caption(f"📍 '{selected_attraction_name}' 반경 {radius}m 이내 식당이에요.")
-    else:
-        center_x, center_y = region_lon, region_lat
-        radius = 3000
-        toilet_query = f"{selected_region} 화장실"
-        st.caption(f"📍 '{selected_region}' 중심 반경 {radius}m 이내 식당이에요. (위에서 관광지를 고르면 더 좁혀져요)")
+        # 3) 음식점(FD6) 조회
+        kakao_data = fetch_kakao_places(center_x, center_y, kakao_rest_key, category_code="FD6", radius=radius)
+        if kakao_data:
+            documents = kakao_data.get("documents", [])
+            if not documents:
+                st.info("이 근처에 카카오맵 등록 식당이 없어요. 다른 관광지를 선택해보세요.")
 
-    # 화장실: 카카오 키워드 검색으로 실좌표 조회 시도 (공식 화장실 API는 2025년부터 좌표 미제공이라 대체)
-    toilet_data = fetch_kakao_keyword("공중화장실", center_x, center_y, kakao_rest_key, radius=radius, size=10)
-    toilets = []
-    if toilet_data:
-        for d in toilet_data.get("documents", []):
-            if d.get("place_name") and d.get("x") and d.get("y"):
-                toilets.append({
-                    "title": d["place_name"],
-                    "lat": float(d["y"]),
-                    "lon": float(d["x"]),
+            restaurants = []
+            for d in documents:
+                restaurants.append({
+                    "title": d.get("place_name", "이름 없음"),
+                    "addr": d.get("road_address_name") or d.get("address_name", "주소 정보 없음"),
+                    "category": (d.get("category_name") or "").split(">")[-1].strip(),
+                    "distance": d.get("distance"),
+                    "phone": d.get("phone"),
+                    "url": d.get("place_url"),
+                    "lat": float(d["y"]) if d.get("y") else None,
+                    "lon": float(d["x"]) if d.get("x") else None,
                 })
 
-    kakao_map_url = f"https://map.kakao.com/?q={urllib.parse.quote(toilet_query)}"
-    if toilets:
-        st.caption(f"🚻 근처 화장실 {len(toilets)}곳을 지도에 회색 핀으로 표시했어요. (카카오맵 태그 기준이라 일부 누락될 수 있어요 · [카카오맵에서 더보기]({kakao_map_url}))")
-    else:
-        st.caption(f"🚻 이 근처엔 카카오맵에 태그된 화장실이 안 잡혀요 → [카카오맵에서 '{toilet_query}' 검색하기]({kakao_map_url})")
+            # 지도 + 반경/화장실 안내를 카드 하나로 묶음
+            with st.container(border=True):
+                st.caption(f"📍 {radius_desc}  \n{toilet_line}")
+                if FOLIUM_AVAILABLE:
+                    map_markers = [{"title": r["title"], "lat": r["lat"], "lon": r["lon"], "grade": None} for r in restaurants]
+                    fmap = build_restaurant_map(map_markers, attraction=attraction_marker, toilets=toilets)
+                    if fmap:
+                        st_folium(fmap, use_container_width=True, height=400, returned_objects=[])
+                    else:
+                        st.caption("지도에 표시할 좌표 정보가 없어요.")
+                else:
+                    st.info("🗺️ 지도를 보려면 터미널에서 `pip install folium streamlit-folium` 설치 후 앱을 다시 실행해주세요.")
 
-    # 3) 음식점(FD6) 조회
-    kakao_data = fetch_kakao_places(center_x, center_y, kakao_rest_key, category_code="FD6", radius=radius)
-    if kakao_data:
-        documents = kakao_data.get("documents", [])
-        if not documents:
-            st.info("이 근처에 카카오맵 등록 식당이 없어요. 다른 관광지를 선택해보세요.")
+            for r in restaurants:
+                dist_txt = f"{r['distance']}m" if r["distance"] else ""
+                phone_txt = f' · 📞 {html.escape(r["phone"])}' if r["phone"] else ""
+                url_html = f' · <a href="{html.escape(r["url"])}" target="_blank">카카오맵에서 보기 ↗</a>' if r["url"] else ""
 
-        restaurants = []
-        for d in documents:
-            restaurants.append({
-                "title": d.get("place_name", "이름 없음"),
-                "addr": d.get("road_address_name") or d.get("address_name", "주소 정보 없음"),
-                "category": (d.get("category_name") or "").split(">")[-1].strip(),
-                "distance": d.get("distance"),
-                "phone": d.get("phone"),
-                "url": d.get("place_url"),
-                "lat": float(d["y"]) if d.get("y") else None,
-                "lon": float(d["x"]) if d.get("x") else None,
-            })
-
-        if FOLIUM_AVAILABLE:
-            map_markers = [{"title": r["title"], "lat": r["lat"], "lon": r["lon"], "grade": None} for r in restaurants]
-            fmap = build_restaurant_map(map_markers, attraction=attraction_marker, toilets=toilets)
-            if fmap:
-                st_folium(fmap, use_container_width=True, height=400, returned_objects=[])
-            else:
-                st.caption("지도에 표시할 좌표 정보가 없어요.")
-        else:
-            st.info("🗺️ 지도를 보려면 터미널에서 `pip install folium streamlit-folium` 설치 후 앱을 다시 실행해주세요.")
-
-        for r in restaurants:
-            dist_txt = f"{r['distance']}m" if r["distance"] else ""
-            phone_txt = f' · 📞 {html.escape(r["phone"])}' if r["phone"] else ""
-            url_html = f' · <a href="{html.escape(r["url"])}" target="_blank">카카오맵에서 보기 ↗</a>' if r["url"] else ""
-
-            render_html(f"""
-            <div class="sf-food-card">
-              <div class="sf-food-card-top">
-                <div style="flex:1; min-width:240px;">
-                  <p class="sf-food-name">🍽️ {html.escape(r['title'])}</p>
-                  <p class="sf-food-sub">📍 {html.escape(r['addr'])} · {dist_txt}{phone_txt}</p>
-                  <p class="sf-caption">🏷️ {html.escape(r['category'])}{url_html}</p>
-                  <p class="sf-caption">ℹ️ 카카오는 메뉴 정보를 제공하지 않아요. 대표메뉴를 알고 계시면 아래 '메뉴 직접 검색'에 입력해보세요.</p>
+                render_html(f"""
+                <div class="sf-food-card">
+                  <div class="sf-food-card-top">
+                    <div style="flex:1; min-width:240px;">
+                      <p class="sf-food-name">🍽️ {html.escape(r['title'])}</p>
+                      <p class="sf-food-sub">📍 {html.escape(r['addr'])} · {dist_txt}{phone_txt}</p>
+                      <p class="sf-caption">🏷️ {html.escape(r['category'])}{url_html}</p>
+                      <p class="sf-caption">ℹ️ 카카오는 메뉴 정보를 제공하지 않아요. 대표메뉴를 알고 계시면 아래 '메뉴 직접 검색'에 입력해보세요.</p>
+                    </div>
+                    <div style="text-align:right; color: var(--sf-muted); font-family:'IBM Plex Mono',monospace; font-size:0.85rem;">{dist_txt}</div>
+                  </div>
                 </div>
-                <div style="text-align:right; color: var(--sf-muted); font-family:'IBM Plex Mono',monospace; font-size:0.85rem;">{dist_txt}</div>
-              </div>
-            </div>
-            """)
+                """)
 
-            restaurant_checklist = get_checklist(selected_diseases, ibd_active, category_text=r["category"])
-            restaurant_recs = get_recommendations(selected_diseases, ibd_active)
-            if restaurant_recs:
-                with st.expander("🥗 이런 메뉴는 비교적 무난해요"):
-                    for rec in restaurant_recs:
-                        st.write(f"• {rec}")
-                    st.caption("※ 일반적인 식품군 참고 정보이며, 정확한 개인별 식단은 의료진·영양사와 상담하세요.")
-            if restaurant_checklist:
-                with st.expander("🗣️ 이 식당에서 확인해보세요"):
-                    for q in restaurant_checklist:
-                        st.write(f"• {q}")
-    else:
-        st.error("카카오 로컬 API 호출에 실패했습니다. REST API 키와 앱 설정의 '카카오맵 사용 설정'을 확인해주세요.")
+                restaurant_checklist = get_checklist(selected_diseases, ibd_active, category_text=r["category"])
+                restaurant_recs = get_recommendations(selected_diseases, ibd_active, category_text=r["category"])
+                if restaurant_recs:
+                    with st.expander("🥗 이런 메뉴는 비교적 무난해요"):
+                        for rec in restaurant_recs:
+                            st.write(f"• {rec}")
+                        st.caption("※ 일반적인 식품군 참고 정보이며, 정확한 개인별 식단은 의료진·영양사와 상담하세요.")
+                if restaurant_checklist:
+                    with st.expander("🗣️ 이 식당에서 확인해보세요"):
+                        for q in restaurant_checklist:
+                            st.write(f"• {q}")
+        else:
+            st.error("카카오 로컬 API 호출에 실패했습니다. REST API 키와 앱 설정의 '카카오맵 사용 설정'을 확인해주세요.")
 
 st.markdown("---")
 
@@ -1440,8 +1709,8 @@ section_eyebrow("04", "BUILD YOUR ROUTE")
 st.header("🗺️ 오늘의 코스 만들기")
 st.caption("관광지를 2~4곳 고르면, 가까운 순서로 엮어서 간단한 동선을 만들어드려요. (직선거리 기준이라 실제 도보·차량 경로와는 다를 수 있어요)")
 
-if not kakao_rest_key:
-    st.info("👈 사이드바에 카카오 REST API 키를 입력하면 코스 만들기를 사용할 수 있어요.")
+if not tour_service_key and not kakao_rest_key:
+    st.info("코스 만들기 기능을 준비 중이에요.")
 elif not attraction_map:
     st.caption("이 지역 근처에 등록된 관광명소가 없어서 코스를 만들 수 없어요.")
 else:
